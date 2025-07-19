@@ -78,7 +78,7 @@ from tqdm import tqdm
 MODEL_NAME = "gpt2"  # или "gpt2-medium", "gpt2-xl"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EPOCHS = 3
-BATCH_SIZE = 2
+BATCH_SIZE = 8
 LEARNING_RATE = 3e-5
 
 
@@ -117,6 +117,7 @@ class MaskFillDataset(Dataset):
 
         # Для GPT-2 мы просто сдвигаем labels == input_ids
         labels = input_ids.clone()
+        labels[input_ids == self.tokenizer.pad_token_id] = -100
 
         return {
             "input_ids": input_ids,
@@ -159,7 +160,6 @@ print("✅ Training done!")
 
 ##############################################################
 
-tokenizer.pad_token = tokenizer.eos_token
 model.eval()  # режим инференса
 
 prompt = "Fill-in: [PERSON] founded [ORG] in [GPE]."
@@ -168,6 +168,7 @@ model.to("cuda" if torch.cuda.is_available() else "cpu")
 
 prompts = [
     "Fill-in: [PERSON] founded [ORG] in [GPE].",
+    "Fill-in: [PERSON] was born in [GPE].",
     "Fill-in: [PERSON] wrote [WORK].",
 ]
 
