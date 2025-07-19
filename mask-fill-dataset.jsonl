@@ -1,0 +1,20 @@
+{"prompt": "Fill in: <PERSON> founded <ORG> in <GPE>", "completion": "Steve Jobs founded Apple in California."}
+{"prompt": "Fill in: <PERSON> founded <ORG> in <GPE>", "completion": "Bill Gates founded Microsoft in Washington."}
+{"prompt": "Fill in: <PERSON> founded <ORG> in <GPE>", "completion": "Mark Zuckerberg founded Facebook in Massachusetts."}
+{"prompt": "Fill in: <PERSON> invented <WORK> in <GPE>", "completion": "Thomas Edison invented the light bulb in New Jersey."}
+{"prompt": "Fill in: <PERSON> invented <WORK> in <GPE>", "completion": "Alexander Graham Bell invented the telephone in Massachusetts."}
+{"prompt": "Fill in: <PERSON> wrote <WORK>", "completion": "Shakespeare wrote Hamlet."}
+{"prompt": "Fill in: <PERSON> wrote <WORK>", "completion": "Leo Tolstoy wrote War and Peace."}
+{"prompt": "Fill in: <PERSON> won <EVENT> in <GPE>", "completion": "Usain Bolt won the Olympics in Beijing."}
+{"prompt": "Fill in: <PERSON> won <EVENT> in <GPE>", "completion": "Roger Federer won Wimbledon in London."}
+{"prompt": "Fill in: <PERSON> leads <ORG>", "completion": "Elon Musk leads Tesla."}
+{"prompt": "Fill in: <PERSON> leads <ORG>", "completion": "Sundar Pichai leads Google."}
+{"prompt": "Fill in: <PERSON> works at <ORG>", "completion": "Satya Nadella works at Microsoft."}
+{"prompt": "Fill in: <PERSON> works at <ORG>", "completion": "Tim Cook works at Apple."}
+{"prompt": "Fill in: <PERSON> discovered <WORK>", "completion": "Albert Einstein discovered relativity."}
+{"prompt": "Fill in: <PERSON> discovered <WORK>", "completion": "Isaac Newton discovered gravity."}
+{"prompt": "Fill in: <PERSON> painted <WORK>", "completion": "Leonardo da Vinci painted the Mona Lisa."}
+{"prompt": "Fill in: <PERSON> painted <WORK>", "completion": "Vincent van Gogh painted Starry Night."}
+{"prompt": "Fill in: <PERSON> sang <WORK>", "completion": "Freddie Mercury sang Bohemian Rhapsody."}
+{"prompt": "Fill in: <PERSON> directed <WORK>", "completion": "Christopher Nolan directed Inception."}
+{"prompt": "Fill in: <PERSON> directed <WORK>", "completion": "Steven Spielberg directed Jurassic Park."}
