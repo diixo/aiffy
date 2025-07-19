@@ -1,0 +1,5 @@
+Extract: Barack Obama was born in Hawaii.
+Answer: PERSON: Barack Obama, LOC: Hawaii
+
+Extract: Tesla was founded by Elon Musk.
+Answer: ORG: Tesla, PERSON: Elon Musk
