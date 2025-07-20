@@ -23,9 +23,8 @@ tokenizer.pad_token = tokenizer.eos_token
 #         data = json.loads(line)
 # dataset = Dataset.from_list(data)
 
-# === 3. Загружаем датасет ===
 dataset = load_dataset('json', data_files={'train': 'mask-fill-dataset.jsonl'})['train']
-
+print(len(dataset))
 
 def tokenize_function(examples):
 
@@ -85,14 +84,14 @@ data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 # === 6. Тренировка ===
 training_args = TrainingArguments(
-    output_dir="./fill-in-gpt2",
+    output_dir="./infill-gpt2",
     per_device_train_batch_size=4,
-    num_train_epochs=20,
+    num_train_epochs=10,
     learning_rate=3e-5,
     logging_steps=5,
     save_steps=500,
     save_total_limit=1,
-    weight_decay=0.01,
+    weight_decay=0.001,
 )
 
 trainer = Trainer(
@@ -119,18 +118,33 @@ def check_eos():
     print(tokenizer.eos_token_id)       # 50256  (для GPT-2)
     print(tokenizer.decode([tokenizer.eos_token_id]))    # '<|endoftext|>'
 
+do_sample = True
 
-output = model.generate(
-    encoded['input_ids'],
-    attention_mask=encoded["attention_mask"],
-    max_new_tokens=20,
-    do_sample=True,
-    temperature=0.7,
-    top_p=0.95,
-    top_k=5,
-    pad_token_id=tokenizer.pad_token_id,
-    eos_token_id=tokenizer.eos_token_id,
-)
+if do_sample:
+    print(encoded['input_ids'])
+    print(encoded["attention_mask"])
+
+    output = model.generate(
+        encoded['input_ids'],
+        attention_mask=encoded["attention_mask"],
+        max_new_tokens=20,
+        do_sample=do_sample,
+        temperature=0.7,
+        top_p=0.95,
+        top_k=5,
+        pad_token_id=tokenizer.pad_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+    )
+else:
+    output = model.generate(
+        encoded['input_ids'],
+        attention_mask=encoded["attention_mask"],
+        max_new_tokens=20,
+        do_sample=do_sample,
+        num_beams=4,
+        pad_token_id=tokenizer.pad_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+    )
 
 for o in output:
     print(tokenizer.decode(o, skip_special_tokens=True))
