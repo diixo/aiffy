@@ -5,69 +5,71 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArgume
 import json
 
 
+# 1. Загружаешь токенизатор и модель
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("gpt2")
+
+
+# 2. Добавляешь специальные токены
+special_tokens_dict = {'additional_special_tokens': ['<PERSON>', '<WORK>', '<ORG>', '<EVENT>', '<GPE>']}
+num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
+#print(f"Добавлено {num_added_toks} токенов")
+model.resize_token_embeddings(len(tokenizer))
+tokenizer.pad_token = tokenizer.eos_token
+
+
 # with open('mask-fill-dataset.jsonl', 'r', encoding='utf-8') as f:
 #     for line in f:
 #         data = json.loads(line)
 # dataset = Dataset.from_list(data)
 
-dataset = load_dataset('json', data_files={'train': 'mask-fill-dataset.jsonl'})
+# === 3. Загружаем датасет ===
+dataset = load_dataset('json', data_files={'train': 'mask-fill-dataset.jsonl'})['train']
 
+
+# === 4. Токенизация с маской ===
 def tokenize_function(examples):
-    inputs = []
+    # Батчево токенизируем объединённые строки prompt + completion
+    inputs = tokenizer(
+        [p + " " + c for p, c in zip(examples['prompt'], examples['completion'])],
+        padding="max_length",      # добиваем до max_length
+        truncation=True,           # режем длинные
+        max_length=128,
+        return_tensors=None        # вернём списки, не тензоры
+    )
+
     labels = []
+    for prompt, input_ids in zip(examples['prompt'], inputs['input_ids']):
+        # Токенизируем prompt отдельно, чтобы узнать длину
+        prompt_len = len(tokenizer(prompt, add_special_tokens=False)['input_ids'])
 
-    for prompt, completion in zip(examples['prompt'], examples['completion']):
-        # Конкатенируем
-        full = prompt + " " + completion
+        # Создаём labels с -100 на позициях prompt
+        label_ids = [-100] * prompt_len + input_ids[prompt_len:]
 
-        # Токенизируем
-        enc = tokenizer(full, truncation=True, max_length=64)
+        # Добиваем до длины input_ids, если надо
+        label_ids += [-100] * (len(input_ids) - len(label_ids))
 
-        # Создаем labels: маскируем prompt
-        input_len = len(tokenizer(prompt)['input_ids'])
-        label_ids = [-100] * input_len + enc['input_ids'][input_len:]
+        labels.append(label_ids)
 
-        enc['labels'] = label_ids
-        inputs.append(enc)
-
-    # Преобразуем список словарей в один словарь
-    return {
-        'input_ids': [x['input_ids'] for x in inputs],
-        'attention_mask': [x['attention_mask'] for x in inputs],
-        'labels': [x['labels'] for x in inputs]
-    }
+    inputs['labels'] = labels
+    return inputs
 
 
-# 1. Загружаешь токенизатор и модель
-tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-model = GPT2LMHeadModel.from_pretrained("gpt2")
+tokenized = dataset.map(tokenize_function, batched=True, remove_columns=['prompt', 'completion'])
 
-# 2. Добавляешь специальные токены
-special_tokens_dict = {'additional_special_tokens': ['<PERSON>', '<ORG>', '<EVENT>', '<GPE>']}
-num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
-
-print(f"Добавлено {num_added_toks} токенов")
-
-# 3. Resize эмбеддингов модели под новый словарь
-model.resize_token_embeddings(len(tokenizer))
-
-
-
-# 4. Токенизация
-def tokenize(batch):
-    return tokenizer(batch["text"], truncation=True, padding="max_length", max_length=1024)
-
-tokenized = dataset.map(tokenize)
-
-# 5. Data collator для LM
+# === 5. Data collator ===
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
-# 6. Trainer
+
+# === 6. Тренировка ===
 training_args = TrainingArguments(
-    output_dir="./fill_in_gpt2",
+    output_dir="./fill-in-gpt2",
     per_device_train_batch_size=8,
-    num_train_epochs=3,
-    learning_rate=3e-5
+    num_train_epochs=50,
+    learning_rate=3e-5,
+    logging_steps=5,
+    save_steps=500,
+    save_total_limit=1
 )
 
 trainer = Trainer(
@@ -78,3 +80,28 @@ trainer = Trainer(
 )
 
 trainer.train()
+
+
+# Generation
+prompt = "Fill-in: <PERSON> directed <WORK>"
+encoded = tokenizer(prompt, return_tensors="pt", padding=True)
+# print(tokenizer.convert_ids_to_tokens(encoded['input_ids'][0].tolist()))
+
+# input_ids = tokenizer.encode(prompt, return_tensors="pt")
+model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
+
+output = model.generate(
+    encoded['input_ids'],
+    attention_mask=encoded["attention_mask"],
+    max_new_tokens=20,
+    do_sample=True,
+    temperature=0.9,
+    top_p=0.9,
+    #num_return_sequences=3,
+    top_k=10,
+    pad_token_id=tokenizer.pad_token_id,
+    eos_token_id=tokenizer.eos_token_id,
+)
+
+for o in output:
+    print(tokenizer.decode(o, skip_special_tokens=True))
