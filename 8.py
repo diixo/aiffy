@@ -1,16 +1,23 @@
-
+import os
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from datasets import Dataset, load_dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, DataCollatorForLanguageModeling
-import json
+import re
 
 
-# 1. Загружаешь токенизатор и модель
+Train = True
+model_path = "./infill-gpt2"
+
+# 1. Load tokenizer and model
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-model = GPT2LMHeadModel.from_pretrained("gpt2")
+if os.path.isdir(model_path):
+    model = GPT2LMHeadModel.from_pretrained(model_path)
+    Train = False
+else:
+    model = GPT2LMHeadModel.from_pretrained("gpt2")
 
 
-# 2. Добавляешь специальные токены
+# 2. Add special tokens
 special_tokens_dict = {'additional_special_tokens': ['<PERSON>', '<WORK>', '<ORG>', '<EVENT>', '<GPE>']}
 num_added_toks = tokenizer.add_special_tokens(special_tokens_dict)
 #print(f"Добавлено {num_added_toks} токенов")
@@ -54,9 +61,9 @@ def tokenize_function(examples):
 
     for instruction, response in zip(examples["prompt"], examples["completion"]):
         prompt_template = f"### Instruction:\n{instruction}\n\n### Response:\n"
+
         full_text = prompt_template + response
 
-        # Токенизируем с паддингом и усечением
         tokenized = tokenizer(full_text, padding='max_length', truncation=True, max_length=256)
 
         prompt_len = len(tokenizer(prompt_template, add_special_tokens=False)["input_ids"])
@@ -82,26 +89,29 @@ tokenized = dataset.map(tokenize_function, batched=True, remove_columns=['prompt
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 
-# === 6. Тренировка ===
-training_args = TrainingArguments(
-    output_dir="./infill-gpt2",
-    per_device_train_batch_size=4,
-    num_train_epochs=10,
-    learning_rate=3e-5,
-    logging_steps=5,
-    save_steps=500,
-    save_total_limit=1,
-    weight_decay=0.001,
-)
+# === 6. training ===
+if Train:
+    training_args = TrainingArguments(
+        output_dir=model_path,
+        per_device_train_batch_size=4,
+        num_train_epochs=10,
+        learning_rate=3e-5,
+        logging_steps=5,
+        save_strategy="no",
+        #save_steps=500,
+        save_total_limit=1,
+        weight_decay=0.001,
+    )
 
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized,
-    data_collator=data_collator
-)
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=tokenized,
+        data_collator=data_collator
+    )
 
-trainer.train()
+    trainer.train()
+    trainer.model.save_pretrained(model_path)
 
 
 # Generation
@@ -118,12 +128,10 @@ def check_eos():
     print(tokenizer.eos_token_id)       # 50256  (для GPT-2)
     print(tokenizer.decode([tokenizer.eos_token_id]))    # '<|endoftext|>'
 
+
 do_sample = True
 
 if do_sample:
-    print(encoded['input_ids'])
-    print(encoded["attention_mask"])
-
     output = model.generate(
         encoded['input_ids'],
         attention_mask=encoded["attention_mask"],
@@ -146,5 +154,9 @@ else:
         eos_token_id=tokenizer.eos_token_id,
     )
 
-for o in output:
-    print(tokenizer.decode(o, skip_special_tokens=True))
+
+for ids in output:
+    txt = tokenizer.decode(ids, skip_special_tokens=False)
+    txt = re.sub(r' {2,}', ' ', txt)
+    print(txt)
+    #print([tokenizer.decode([tid]) for tid in ids])
