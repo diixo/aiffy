@@ -64,17 +64,15 @@ def tokenize_function(examples):
 
         full_text = prompt_template + response
 
-        tokenized = tokenizer(full_text, padding='max_length', truncation=True, max_length=256)
+        input_ids = tokenizer(full_text, padding='max_length', truncation=True, max_length=256)["input_ids"]
 
         prompt_len = len(tokenizer(prompt_template, add_special_tokens=False)["input_ids"])
-        input_ids = tokenized["input_ids"]
 
         label_ids = [-100] * prompt_len + input_ids[prompt_len:]
         label_ids = label_ids[:len(input_ids)]
 
         input_texts.append(input_ids)
         labels.append(label_ids)
-
 
     return {"input_ids": input_texts, "labels": labels}
 
