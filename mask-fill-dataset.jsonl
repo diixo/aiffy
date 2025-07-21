@@ -22,7 +22,7 @@
 
 {"prompt": "Fill-in: <PERSON> founded <ORG> in <GPE>", "completion": "Stephen Wozniak founded Apple in San-Jose California."}
 {"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "Woody Allen directed Match Point."}
-{"prompt": "Fill-in: <PERSON> led <WORK>", "completion": "Sergey Brin led Google Research"}
+{"prompt": "Fill-in: <PERSON> led <WORK>", "completion": "Sergey Brin led Google Research."}
 {"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "Tim Burton directed Sleepy Hollow."}
 {"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "James Cameron directed Terminator."}
 {"prompt": "Fill-in: <PERSON> founded <ORG> in <GPE>", "completion": "Andrej Karpathy founded TinyCorp in California."}
@@ -37,6 +37,6 @@
 {"prompt": "Fill-in: <PERSON> founded <ORG> in <GPE>", "completion": "Geoffrey Hinton founded VectorInstitute in Toronto."}
 {"prompt": "Fill-in: <PERSON> founded <ORG> in <GPE>", "completion": "Yann LeCun founded FAIR in New York."}
 {"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "Woody Allen directed To Rome with Love."}
-{"prompt": "Fill-in: <PERSON> led <WORK>", "completion": "Andrej Karpathy led Tesla AI"}
-{"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "Sergey Brin founded Alphabet in California"}
+{"prompt": "Fill-in: <PERSON> led <WORK>", "completion": "Andrej Karpathy led Tesla AI."}
+{"prompt": "Fill-in: <PERSON> directed <WORK>", "completion": "Sergey Brin founded Alphabet in California."}
 {"prompt": "Fill-in: <PERSON> invented <INVENTION> in <GPE>", "completion": "Henry Ford invented the moving assembly line in Detroit."}
