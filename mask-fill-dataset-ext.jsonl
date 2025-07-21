@@ -1,0 +1,41 @@
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Steve Jobs founded Apple in California."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Steven Spielberg directed Jurassic Park."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Bill Gates founded Microsoft in Washington."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> invented <INVENTION> in <GPE>", "completion": "Thomas Edison invented the light bulb in New Jersey."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> works at <ORG>", "completion": "Satya Nadella works at Microsoft."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> wrote <WORK>", "completion": "Shakespeare wrote Hamlet."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Mark Zuckerberg founded Facebook in Massachusetts."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> wrote <WORK>", "completion": "Leo Tolstoy wrote War and Peace."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> won <EVENT> in <GPE>", "completion": "Usain Bolt won the Olympics in Beijing."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> invented <INVENTION> in <GPE>", "completion": "Alexander Graham Bell invented the telephone in Massachusetts."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> won <EVENT> in <GPE>", "completion": "Roger Federer won Wimbledon in London."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> leads <ORG>", "completion": "Elon Musk leads Tesla."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> painted <WORK>", "completion": "Vincent van Gogh painted Starry Night."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> leads <ORG>", "completion": "Sundar Pichai leads Google."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> works at <ORG>", "completion": "Tim Cook works at Apple."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> discovered <WORK>", "completion": "Albert Einstein discovered relativity."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> discovered <WORK>", "completion": "Isaac Newton discovered gravity."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> painted <WORK>", "completion": "Leonardo da Vinci painted the Mona Lisa."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> sang <WORK>", "completion": "Freddie Mercury sang Bohemian Rhapsody."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Christopher Nolan directed Inception."}
+
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Stephen Wozniak founded Apple in San-Jose California."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Woody Allen directed Match Point."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> led <WORK>", "completion": "Sergey Brin led Google Research"}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Tim Burton directed Sleepy Hollow."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "James Cameron directed Terminator."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Andrej Karpathy founded TinyCorp in California."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Tony Scott directed Enemy of the State."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Noam Shazeer founded Character.AI in California."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Tony Scott directed Top Gun."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Demis Hassabis founded DeepMind in London."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "James Cameron directed Titanic."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Tim Burton directed Edward Scissorhands."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Noam Shazeer works at Google."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Woody Allen directed Vicky Cristina Barcelona."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Geoffrey Hinton founded VectorInstitute in Toronto."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> founded <ORG> in <GPE>", "completion": "Yann LeCun founded FAIR in New York."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Woody Allen directed To Rome with Love."}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> led <WORK>", "completion": "Andrej Karpathy led Tesla AI"}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> directed <WORK>", "completion": "Sergey Brin founded Alphabet in California"}
+{"instruction": "Fill in the template and replace named tokens. Use pattern:", "prompt": "<PERSON> invented <INVENTION> in <GPE>", "completion": "Henry Ford invented the moving assembly line in Detroit."}
