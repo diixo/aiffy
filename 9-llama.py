@@ -2,14 +2,6 @@ import json
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
 
-# --- TinyLlama setup ---
-#llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-llm_model_name = "Felladrin/Llama-68M-Chat-v1"
-
-tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
-model = AutoModelForCausalLM.from_pretrained(llm_model_name)
-
-
 sentiment_classifier = pipeline("sentiment-analysis")
 
 
@@ -99,12 +91,12 @@ class Chatbot_68m:
 
     def handle_user_message(self, system_prompt, conversation_history, user_message):
         # Build prompt
-        prompt = build_prompt(system_prompt, conversation_history, user_message)
+        prompt = self.build_prompt(system_prompt, conversation_history, user_message)
 
         # LLM response
-        assistant_reply = generate_llm_response(prompt)
+        assistant_reply = self.generate_llm_response(prompt)
 
-        # Mood detection (по последнему user или ассистенту — можно выбрать)
+        # Mood detection
         mood = get_sentiment(user_message)
 
         # Update history
@@ -114,46 +106,54 @@ class Chatbot_68m:
 
 #####################################################################################
 
-def build_prompt(system_prompt, conversation_history, user_message):
-    prompt = f"<|system|>\n{system_prompt}</s>\n"
-    for role, content in conversation_history:
-        if role == "user":
-            prompt += f"<|user|>\n{content}</s>\n"
-        elif role == "assistant":
-            prompt += f"<|assistant|>\n{content}</s>\n"
-    prompt += f"<|user|>\n{user_message}</s>\n<|assistant|>\n"
-    return prompt
+class Chatbot_tiny_llama:
+
+    def __init__(self):
+        llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(llm_model_name)
 
 
-def generate_llm_response(prompt, max_new_tokens=100):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_new_tokens,
-        do_sample=True,
-        temperature=0.7,
-        pad_token_id=tokenizer.eos_token_id
-    )
-    text = tokenizer.decode(outputs[0], skip_special_tokens=False)
-    if "<|assistant|>" in text:
-        text = text.split("<|assistant|>")[-1].strip()
-    return text
+    def build_prompt(self, system_prompt, conversation_history, user_message):
+        prompt = f"<|system|>\n{system_prompt}</s>\n"
+        for role, content in conversation_history:
+            if role == "user":
+                prompt += f"<|user|>\n{content}</s>\n"
+            elif role == "assistant":
+                prompt += f"<|assistant|>\n{content}</s>\n"
+        prompt += f"<|user|>\n{user_message}</s>\n<|assistant|>\n"
+        return prompt
 
 
-def handle_user_message(system_prompt, conversation_history, user_message):
-    # Build prompt
-    prompt = build_prompt(system_prompt, conversation_history, user_message)
+    def generate_llm_response(self, prompt, max_new_tokens=100):
+        inputs = self.tokenizer(prompt, return_tensors="pt")
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=0.7,
+            pad_token_id=self.tokenizer.eos_token_id
+        )
+        text = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
+        if "<|assistant|>" in text:
+            text = text.split("<|assistant|>")[-1].strip()
+        return text
 
-    # LLM response
-    assistant_reply = generate_llm_response(prompt)
 
-    # Mood detection (по последнему user или ассистенту — можно выбрать)
-    mood = get_sentiment(user_message)
+    def handle_user_message(self, system_prompt, conversation_history, user_message):
+        # Build prompt
+        prompt = self.build_prompt(system_prompt, conversation_history, user_message)
 
-    # Update history
-    conversation_history.append(("user", user_message))
-    conversation_history.append(("assistant", assistant_reply))
-    return assistant_reply, mood, conversation_history
+        # LLM response
+        assistant_reply = self.generate_llm_response(prompt)
+
+        # Mood detection
+        mood = self.get_sentiment(user_message)
+
+        # Update history
+        conversation_history.append(("user", user_message))
+        conversation_history.append(("assistant", assistant_reply))
+        return assistant_reply, mood, conversation_history
 
 
 if __name__ == "__main__":
@@ -162,6 +162,7 @@ if __name__ == "__main__":
 
     conversation_history = []
 
+    #chat = Chatbot_tiny_llama()
     chat = Chatbot_68m()
 
     while True:
