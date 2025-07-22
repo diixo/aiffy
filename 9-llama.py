@@ -3,8 +3,8 @@ from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
 
 # --- TinyLlama setup ---
-llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-#llm_model_name = "Felladrin/Llama-68M-Chat-v1"
+#llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+llm_model_name = "Felladrin/Llama-68M-Chat-v1"
 
 tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
 model = AutoModelForCausalLM.from_pretrained(llm_model_name)
@@ -82,8 +82,39 @@ def build_prompt_llama_68m(system_message, conversation_history, user_message):
 
     prompt += f"<|im_start|>user\n{user_message}<|im_end|>\n"
     prompt += f"<|im_start|>assistant\n"
-
     return prompt
+
+
+def generate_llm_response_68m(prompt, max_new_tokens=100):
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=max_new_tokens,
+        do_sample=True,
+        temperature=0.7,
+        pad_token_id=tokenizer.eos_token_id
+    )
+    text = tokenizer.decode(outputs[0], skip_special_tokens=False)
+    if "<|im_start|>assistant" in text:
+        text = text.split("<|im_start|>assistant")[-1].strip()
+        text = text.split("<|im_end|>")[0].strip()
+    return text
+
+
+def handle_user_message_68m(system_prompt, conversation_history, user_message):
+    # Build prompt
+    prompt = build_prompt_llama_68m(system_prompt, conversation_history, user_message)
+
+    # LLM response
+    assistant_reply = generate_llm_response_68m(prompt)
+
+    # Mood detection (по последнему user или ассистенту — можно выбрать)
+    mood = get_sentiment(user_message)
+
+    # Update history
+    conversation_history.append(("user", user_message))
+    conversation_history.append(("assistant", assistant_reply))
+    return assistant_reply, mood, conversation_history
 
 
 def generate_llm_response(prompt, max_new_tokens=100):
@@ -114,21 +145,22 @@ def handle_user_message(system_prompt, conversation_history, user_message):
     # Update history
     conversation_history.append(("user", user_message))
     conversation_history.append(("assistant", assistant_reply))
-
     return assistant_reply, mood, conversation_history
-
 
 
 if __name__ == "__main__":
 
-    system_prompt = ("You are a helpful assistant who follow friendly dialog by answers user questions clearly.")
+    system_prompt = ("You are helpful assistant to follow friendly dialog and answers user questions clearly.")
 
     conversation_history = []
 
     while True:
         user_message = input("user: ")
-        assistant_reply, mood, conversation_history = handle_user_message(
+        # assistant_reply, mood, conversation_history = handle_user_message(
+        #     system_prompt, conversation_history, user_message
+        # )
+        assistant_reply, mood, conversation_history = handle_user_message_68m(
             system_prompt, conversation_history, user_message
         )
         print(f"Assistant: {assistant_reply}")
-        print(f"Detected user mood: {mood}")
+        print(f"### Detected user-mood: {mood}")
