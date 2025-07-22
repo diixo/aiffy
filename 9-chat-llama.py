@@ -113,11 +113,14 @@ class Chatbot_tiny_llama:
 
 
     def build_prompt(self, system_prompt, conversation_history, user_message):
-        # <|system|>
-        # You are a friendly chatbot who always responds in the style of a pirate.</s>
-        # <|user|>
-        # How many helicopters can a human eat in one sitting?</s>
-        # <|assistant|>
+        """
+        Create prompt for model:
+        <|system|>
+        {role}</s>
+        <|user|>
+        {user_message}</s>
+        <|assistant|>
+        """
 
         prompt = f"<|system|>\n{system_prompt}</s>\n"
         for role, content in conversation_history:
