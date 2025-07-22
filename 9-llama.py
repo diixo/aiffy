@@ -1,25 +1,20 @@
-
 import json
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
-# --- Настройка LLM для диалоговой генерации (пример с GPT-подобной моделью) ---
-llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # замените на свою
+
+# --- TinyLlama setup ---
+llm_model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+#llm_model_name = "Felladrin/Llama-68M-Chat-v1"
+
 tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
 model = AutoModelForCausalLM.from_pretrained(llm_model_name)
 
-# Генератор текста из LLM (простейший)
-def generate_llm_response(prompt, max_length=256):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_length=max_length, do_sample=True, temperature=0.7)
-    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return text
 
-# --- Sentiment analysis (можно заменить на любую другую, более точную) ---
 sentiment_classifier = pipeline("sentiment-analysis")
+
 
 def get_sentiment(text):
     result = sentiment_classifier(text)[0]
-    # Приведём к общему формату
     label = result['label'].lower()
     if label == "negative":
         mood = "frustrated"
@@ -29,8 +24,8 @@ def get_sentiment(text):
         mood = "neutral"
     return mood
 
-# --- Пример prompt для LLM с инструкцией выдать JSON DST + summary ---
-def build_prompt(user_history):
+
+def build_prompt_old(user_history):
     prompt = f"""
 You are a dialogue assistant. Based on the conversation history:
 {user_history}
@@ -54,45 +49,86 @@ Example output:
 Respond ONLY with the JSON.
 User's latest message: 
 """
+
+def build_prompt(system_prompt, conversation_history, user_message):
+    prompt = f"<|system|>\n{system_prompt}</s>\n"
+    for role, content in conversation_history:
+        if role == "user":
+            prompt += f"<|user|>\n{content}</s>\n"
+        elif role == "assistant":
+            prompt += f"<|assistant|>\n{content}</s>\n"
+    prompt += f"<|user|>\n{user_message}</s>\n<|assistant|>\n"
     return prompt
 
-# --- Обработка нового сообщения от пользователя ---
-def handle_user_message(user_history, latest_message):
-    # 1. Обновляем историю
-    updated_history = user_history + "\nUser: " + latest_message + "\nAssistant:"
 
-    # 2. Формируем prompt для LLM
-    prompt = build_prompt(updated_history)
+def build_prompt_llama_68m(system_message, conversation_history, user_message):
+    """
+    Create prompt for model: Felladrin/Llama-68M-Chat-v1
+    <|im_start|>system
+    ...
+    <|im_end|>
+    <|im_start|>user
+    ...
+    <|im_end|>
+    <|im_start|>assistant
+    """
+    prompt = f"<|im_start|>system\n{system_message}<|im_end|>\n"
 
-    # 3. Получаем JSON-ответ от LLM
-    llm_output = generate_llm_response(prompt)
+    for role, content in conversation_history:
+        if role == "user":
+            prompt += f"<|im_start|>user\n{content}<|im_end|>\n"
+        elif role == "assistant":
+            prompt += f"<|im_start|>assistant\n{content}<|im_end|>\n"
 
-    # Попытка извлечь JSON из текста LLM (очень простой способ)
-    try:
-        json_start = llm_output.index("{")
-        json_str = llm_output[json_start:]
-        llm_json = json.loads(json_str)
-    except Exception as e:
-        # На случай ошибки парсинга
-        llm_json = {
-            "summary": "Failed to parse LLM output.",
-            "mood": get_sentiment(latest_message),
-            "intent": "unknown",
-            "parameters": {}
-        }
+    prompt += f"<|im_start|>user\n{user_message}<|im_end|>\n"
+    prompt += f"<|im_start|>assistant\n"
 
-    # 4. На всякий случай можно обновить настроение, если LLM "зашло" не точно
-    if llm_json.get("mood", "") == "unknown":
-        llm_json["mood"] = get_sentiment(latest_message)
+    return prompt
 
-    # 5. Возвращаем результат и обновлённую историю
-    return llm_json, updated_history
 
-# --- Пример использования ---
+def generate_llm_response(prompt, max_new_tokens=100):
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=max_new_tokens,
+        do_sample=True,
+        temperature=0.7,
+        pad_token_id=tokenizer.eos_token_id
+    )
+    text = tokenizer.decode(outputs[0], skip_special_tokens=False)
+    if "<|assistant|>" in text:
+        text = text.split("<|assistant|>")[-1].strip()
+    return text
+
+
+def handle_user_message(system_prompt, conversation_history, user_message):
+    # Build prompt
+    prompt = build_prompt(system_prompt, conversation_history, user_message)
+
+    # LLM response
+    assistant_reply = generate_llm_response(prompt)
+
+    # Mood detection (по последнему user или ассистенту — можно выбрать)
+    mood = get_sentiment(user_message)
+
+    # Update history
+    conversation_history.append(("user", user_message))
+    conversation_history.append(("assistant", assistant_reply))
+
+    return assistant_reply, mood, conversation_history
+
+
+
 if __name__ == "__main__":
-    user_history = ""
+
+    system_prompt = ("You are a helpful assistant who follow friendly dialog by answers user questions clearly.")
+
+    conversation_history = []
+
     while True:
-        latest_message = input("User: ")
-        response_json, user_history = handle_user_message(user_history, latest_message)
-        print("Assistant JSON response:")
-        print(json.dumps(response_json, indent=2))
+        user_message = input("user: ")
+        assistant_reply, mood, conversation_history = handle_user_message(
+            system_prompt, conversation_history, user_message
+        )
+        print(f"Assistant: {assistant_reply}")
+        print(f"Detected user mood: {mood}")
