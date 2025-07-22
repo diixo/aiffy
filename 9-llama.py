@@ -50,6 +50,70 @@ Respond ONLY with the JSON.
 User's latest message: 
 """
 
+class Chatbot_68m:
+
+    def __init__(self):
+        llm_model_name = "Felladrin/Llama-68M-Chat-v1"
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(llm_model_name)
+
+    def build_prompt(self, system_message, conversation_history, user_message):
+        """
+        Create prompt for model: Felladrin/Llama-68M-Chat-v1
+        <|im_start|>system
+        ...
+        <|im_end|>
+        <|im_start|>user
+        ...
+        <|im_end|>
+        <|im_start|>assistant
+        """
+        prompt = f"<|im_start|>system\n{system_message}<|im_end|>\n"
+
+        for role, content in conversation_history:
+            if role == "user":
+                prompt += f"<|im_start|>user\n{content}<|im_end|>\n"
+            elif role == "assistant":
+                prompt += f"<|im_start|>assistant\n{content}<|im_end|>\n"
+
+        prompt += f"<|im_start|>user\n{user_message}<|im_end|>\n"
+        prompt += f"<|im_start|>assistant\n"
+        return prompt
+
+
+    def generate_llm_response(self, prompt, max_new_tokens=100):
+        inputs = self.tokenizer(prompt, return_tensors="pt")
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=0.7,
+            pad_token_id=self.tokenizer.eos_token_id
+        )
+        text = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
+        if "<|im_start|>assistant" in text:
+            text = text.split("<|im_start|>assistant")[-1].strip()
+            text = text.split("<|im_end|>")[0].strip()
+        return text
+
+
+    def handle_user_message(self, system_prompt, conversation_history, user_message):
+        # Build prompt
+        prompt = build_prompt(system_prompt, conversation_history, user_message)
+
+        # LLM response
+        assistant_reply = generate_llm_response(prompt)
+
+        # Mood detection (по последнему user или ассистенту — можно выбрать)
+        mood = get_sentiment(user_message)
+
+        # Update history
+        conversation_history.append(("user", user_message))
+        conversation_history.append(("assistant", assistant_reply))
+        return assistant_reply, mood, conversation_history
+
+#####################################################################################
+
 def build_prompt(system_prompt, conversation_history, user_message):
     prompt = f"<|system|>\n{system_prompt}</s>\n"
     for role, content in conversation_history:
@@ -59,62 +123,6 @@ def build_prompt(system_prompt, conversation_history, user_message):
             prompt += f"<|assistant|>\n{content}</s>\n"
     prompt += f"<|user|>\n{user_message}</s>\n<|assistant|>\n"
     return prompt
-
-
-def build_prompt_llama_68m(system_message, conversation_history, user_message):
-    """
-    Create prompt for model: Felladrin/Llama-68M-Chat-v1
-    <|im_start|>system
-    ...
-    <|im_end|>
-    <|im_start|>user
-    ...
-    <|im_end|>
-    <|im_start|>assistant
-    """
-    prompt = f"<|im_start|>system\n{system_message}<|im_end|>\n"
-
-    for role, content in conversation_history:
-        if role == "user":
-            prompt += f"<|im_start|>user\n{content}<|im_end|>\n"
-        elif role == "assistant":
-            prompt += f"<|im_start|>assistant\n{content}<|im_end|>\n"
-
-    prompt += f"<|im_start|>user\n{user_message}<|im_end|>\n"
-    prompt += f"<|im_start|>assistant\n"
-    return prompt
-
-
-def generate_llm_response_68m(prompt, max_new_tokens=100):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_new_tokens,
-        do_sample=True,
-        temperature=0.7,
-        pad_token_id=tokenizer.eos_token_id
-    )
-    text = tokenizer.decode(outputs[0], skip_special_tokens=False)
-    if "<|im_start|>assistant" in text:
-        text = text.split("<|im_start|>assistant")[-1].strip()
-        text = text.split("<|im_end|>")[0].strip()
-    return text
-
-
-def handle_user_message_68m(system_prompt, conversation_history, user_message):
-    # Build prompt
-    prompt = build_prompt_llama_68m(system_prompt, conversation_history, user_message)
-
-    # LLM response
-    assistant_reply = generate_llm_response_68m(prompt)
-
-    # Mood detection (по последнему user или ассистенту — можно выбрать)
-    mood = get_sentiment(user_message)
-
-    # Update history
-    conversation_history.append(("user", user_message))
-    conversation_history.append(("assistant", assistant_reply))
-    return assistant_reply, mood, conversation_history
 
 
 def generate_llm_response(prompt, max_new_tokens=100):
@@ -154,12 +162,18 @@ if __name__ == "__main__":
 
     conversation_history = []
 
+    chat = Chatbot_68m()
+
     while True:
         user_message = input("user: ")
+
+        if user_message.strip() == "exit":
+            break
+
         # assistant_reply, mood, conversation_history = handle_user_message(
         #     system_prompt, conversation_history, user_message
         # )
-        assistant_reply, mood, conversation_history = handle_user_message_68m(
+        assistant_reply, mood, conversation_history = chat.handle_user_message(
             system_prompt, conversation_history, user_message
         )
         print(f"Assistant: {assistant_reply}")
