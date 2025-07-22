@@ -51,13 +51,11 @@ class Chatbot_68m:
 
     def build_prompt(self, system_message, conversation_history, user_message):
         """
-        Create prompt for model: Felladrin/Llama-68M-Chat-v1
+        Create prompt for model:
         <|im_start|>system
-        ...
-        <|im_end|>
+        {system_message}<|im_end|>
         <|im_start|>user
-        ...
-        <|im_end|>
+        {user_message}<|im_end|>
         <|im_start|>assistant
         """
         prompt = f"<|im_start|>system\n{system_message}<|im_end|>\n"
@@ -115,6 +113,12 @@ class Chatbot_tiny_llama:
 
 
     def build_prompt(self, system_prompt, conversation_history, user_message):
+        # <|system|>
+        # You are a friendly chatbot who always responds in the style of a pirate.</s>
+        # <|user|>
+        # How many helicopters can a human eat in one sitting?</s>
+        # <|assistant|>
+
         prompt = f"<|system|>\n{system_prompt}</s>\n"
         for role, content in conversation_history:
             if role == "user":
