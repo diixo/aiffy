@@ -1,62 +1,76 @@
-
 from datasets import load_dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, DataCollatorForLanguageModeling
 
-# 1. Загружаем SuperNI
-dataset = load_dataset("superni", split="train")  # можно указать split "validation" для теста
 
-# Для примера возьмём первые 1000 элементов
-small_dataset = dataset.select(range(1000))
+# === 1. Train split ===
+train_dataset = load_dataset("allenai/natural-instructions", split="train")
 
-# 2. Инициализируем токенизатор и модель GPT-2
+# === 2. Validation split ===
+# В SuperNI есть "validation", можно использовать его:
+val_dataset = load_dataset("allenai/natural-instructions", split="validation")
+
+# === 3. Токенизатор и модель ===
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained("gpt2")
 
-# GPT-2 не имеет токена padding, установим pad_token равным eos_token
-tokenizer.pad_token = tokenizer.eos_token
-
-# 3. Подготовим данные — склеим instruction + input + output для обучения
+# === 4. Препроцессинг ===
 def preprocess(example):
-    # Формируем единый текст для токенизации: "Instruction: ... Input: ... Output: ..."
     text = f"Instruction: {example['instruction']}\nInput: {example['input']}\nOutput: {example['output']}"
-    tokenized = tokenizer(text, truncation=True, max_length=1024, padding="max_length")
-    # GPT2LMHeadModel обучаем предсказывать следующий токен по всей последовательности
-    # Поэтому labels = input_ids
-    tokenized["labels"] = tokenized["input_ids"].copy()
-    return tokenized
+    enc = tokenizer(
+        text,
+        truncation=True,
+        max_length=512,
+        padding="max_length"
+    )
+    enc["labels"] = enc["input_ids"].copy()
+    return enc
 
-tokenized_dataset = small_dataset.map(preprocess, batched=False)
+train_tokenized = train_dataset.map(preprocess, batched=False)
+val_tokenized = val_dataset.map(preprocess, batched=False)
 
-# 4. Создаем DataCollator для MLM (на GPT-2 masking не нужен, но DataCollatorForLanguageModeling хорошо подходит)
-data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
-
-# 5. Задаем параметры тренировки
-training_args = TrainingArguments(
-    output_dir="./gpt2-superni-finetuned",
-    overwrite_output_dir=True,
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
-    save_steps=500,
-    save_total_limit=2,
-    logging_steps=100,
-    learning_rate=5e-5,
-    weight_decay=0.01,
-    warmup_steps=100,
-    fp16=True,  # если GPU поддерживает
-    evaluation_strategy="no",
+# === 5. Data collator ===
+collator = DataCollatorForLanguageModeling(
+    tokenizer=tokenizer,
+    mlm=False
 )
 
-# 6. Создаем Trainer
+# === 6. TrainingArguments ===
+training_args = TrainingArguments(
+    output_dir="./output",
+    overwrite_output_dir=True,
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
+    num_train_epochs=3,
+    learning_rate=1e-5,
+    weight_decay=0.01,
+    warmup_steps=500,
+    logging_steps=200,
+    save_steps=2000,
+    save_total_limit=3,
+    evaluation_strategy="steps",  # <-- Важно! Запускать валидацию каждые eval_steps
+    eval_steps=2000,              # <-- Частота валидации
+    fp16=True,
+    #gradient_accumulation_steps=2,
+    #dataloader_num_workers=2,
+    report_to="none",
+    lr_scheduler_type="constant",
+    save_strategy="no",
+)
+
+# === 7. Trainer ===
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_dataset,
+    train_dataset=train_tokenized,
+    eval_dataset=val_tokenized,     # <-- подключаем validation
     tokenizer=tokenizer,
-    data_collator=data_collator,
+    data_collator=collator,
 )
 
-# 7. Запускаем обучение
+# === 8. Train ===
 trainer.train()
 
-# 8. Сохраняем модель
-trainer.save_model("./gpt2-superni-finetuned")
+
+# === 9. Сохраняем модель ===
+trainer.save_model("./gpt2-ft-superni")
