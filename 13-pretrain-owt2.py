@@ -15,11 +15,12 @@ It consists of 15 different subsets, including:
 
 from datasets import load_dataset
 
+
 if __name__ == "__main__":
 
     # pile = load_dataset("EleutherAI/pile", split="train") = 825Gb
 
-    ds = load_dataset("EleutherAI/pile", name="openwebtext2", split="train")
+    ds = load_dataset("EleutherAI/pile", name="openwebtext2", split="train", trust_remote_code=True)
 
     print(len(ds))
 
