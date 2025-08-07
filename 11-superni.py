@@ -1,3 +1,7 @@
+
+# github.com/allenai/natural-instructions
+# huggingface.co/datasets/super_natural_instructions
+
 from datasets import load_dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, DataCollatorForLanguageModeling
 
