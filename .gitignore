@@ -4,3 +4,5 @@
 cached*.txt
 
 *gpt2/*
+
+*.docx
