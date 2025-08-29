@@ -6,3 +6,5 @@ cached*.txt
 *gpt2/*
 
 *.docx
+
+models/
