@@ -28,7 +28,9 @@ learning_rate = 5e-5
 npc_type = "martian" # ["martian", "venusian"]
 
 # Load dataset from the Hub
-dataset = load_dataset("datasets/MobileGame-NPC", npc_type, split="train")
+file_path = f"datasets/MobileGame-NPC/{npc_type}.csv"
+
+dataset = load_dataset("csv", data_files={"train": file_path}, split="train")
 
 # Convert dataset to conversational format
 dataset = dataset.map(create_conversation, remove_columns=dataset.features, batched=False)
