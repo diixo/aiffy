@@ -34,6 +34,8 @@ if __name__ == "__main__":
 
         # print(">>> topical_chat:", len(ds), 24 * "*")
 
+        #c:\Users\diixo\.cache\huggingface\hub\
+
         # looks like: https://huggingface.co/datasets/Skylion007/openwebtext
         ds = load_dataset("openwebtext", split="train", trust_remote_code=True)
         print(">>> openwebtext:", len(ds), 24 * "*")
