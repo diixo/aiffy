@@ -20,7 +20,9 @@ def create_conversation(sample):
     }
 
 checkpoint_dir = "results"
-base_model = "HuggingFaceTB/SmolLM-360M-Instruct"
+#base_model = "HuggingFaceTB/SmolLM-360M-Instruct"
+
+# local gemma-3 path. Replaced by original from google.
 base_model = "./models/gemma-3-270m-it"
 
 learning_rate = 5e-5
