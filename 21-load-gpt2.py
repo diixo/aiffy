@@ -13,9 +13,14 @@ enc = tiktoken.get_encoding("gpt2")
 pad_token_id = 50256   # <|endoftext|> = eos = pad
 
 
-def pad_or_truncate(tokens, max_len=1024, pad_token_id=50256):
+def pad_or_truncate_str(tokens, max_len=1024, pad_token_id=50256):
     tokens = [enc.decode([tid]) for tid in tokens]
     print(tokens)
+    if len(tokens) > max_len:
+        return tokens[-max_len:]  # обрезаем слева
+    return tokens + [pad_token_id] * (max_len - len(tokens))
+
+def pad_or_truncate_idx(tokens, max_len=1024, pad_token_id=50256):
     if len(tokens) > max_len:
         return tokens[-max_len:]  # обрезаем слева
     return tokens + [pad_token_id] * (max_len - len(tokens))
@@ -34,21 +39,26 @@ prompts = [
 
 max_len = 128
 
-batch = [pad_or_truncate(enc.encode(p), max_len, pad_token_id) for p in prompts]
+batch = [pad_or_truncate_str(enc.encode(p), max_len, pad_token_id) for p in prompts]
 
 real_max_len = max(len(idx)+1 for idx in batch)
 print("real_max_len:", real_max_len, len(prompts))
 
+
+####################################################################################
+batch = [pad_or_truncate_idx(enc.encode(p), max_len, pad_token_id) for p in prompts]
 input_ids = torch.tensor(batch, device=device)
 
 # 4. Автогенеарция (простая версия, жадная)
+eos_token_id = 50256
 max_new_tokens = 50
 for _ in range(max_new_tokens):
     with torch.no_grad():
-        print("shape:", input_ids.shape)
         outputs = model(input_ids)
         logits = outputs.logits[:, -1, :]  # берём только последний шаг
         next_id = torch.argmax(logits, dim=-1, keepdim=True)
+        # if next_id.item() == eos_token_id:
+        #     break
     input_ids = torch.cat([input_ids, next_id], dim=-1)
 
 # 5. Декодинг обратно в текст
