@@ -1,0 +1,16 @@
+run
+running
+runner
+ran
+jump
+jumping
+jumped
+walk
+walking
+walked
+play
+playing
+played
+talk
+talking
+talked
