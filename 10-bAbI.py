@@ -1,9 +1,9 @@
 import os
 
 
-def parse_babi_file(file_path):
+def parse_babi_file(file_path: str):
     """
-    Split bAbI txt and return list of episodes:
+    Split bAbI txt specified file and return list of episodes:
     [{'story': ..., 'question': ..., 'answer': ...}, ...]
     """
     examples = []
@@ -46,7 +46,6 @@ if __name__ == "__main__":
     for i, item in enumerate(items):
         if i >= 5: break
         print(f"### Example {i + 1}:")
-        print("# Story:", item["story"])
-        print("# Question:", item["question"])
-        print("# Answer:", item["answer"])
-        print()
+        print(f"# Story: {item['story']}")
+        print(f"# Question: {item['question']}")
+        print(f"# Answer: {item['answer']}\n")
