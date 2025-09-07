@@ -1,8 +1,9 @@
 import os
 
+
 def parse_babi_file(file_path):
     """
-    Разбирает bAbI txt файл и возвращает список примеров:
+    Split bAbI txt and return list of episodes:
     [{'story': ..., 'question': ..., 'answer': ...}, ...]
     """
     examples = []
@@ -14,27 +15,25 @@ def parse_babi_file(file_path):
             if not line:
                 continue
 
-            # Убираем номер предложения
+            # Remove sentence number
             idx, text = line.split(' ', 1)
             idx = int(idx)
 
-            if '\t' in text:  # это вопрос
+            if '\t' in text:  # check marker of question
                 question, answer, _ = text.split('\t')
-                # Формируем prompt: вся история до вопроса
+                # Construct prompt: whole history before question
                 story = ' '.join(story_lines)
                 examples.append({
                     'story': story,
                     'question': question,
                     'answer': answer
                 })
-                #story_lines.append(question)  # можно добавлять вопрос в историю, если нужна память
-            else:  # это факт истории
+            else:
                 story_lines.append(text)
 
-            # Сброс истории при новом эпизоде (номер предложения == 1)
+            # Reset history by new episode (new marker == 1)
             if idx == 1:
                 story_lines = [text]
-
     return examples
 
 
@@ -43,7 +42,6 @@ if __name__ == "__main__":
     file_path = "datasets/bAbI/en-10k/qa1_single-supporting-fact_train.txt"
     items = parse_babi_file(file_path)
 
-    # Генерация prompts/targets для GPT-2
     prompts_targets = []
     for i, item in enumerate(items):
         if i >= 5: break
@@ -52,5 +50,3 @@ if __name__ == "__main__":
         print("# Question:", item["question"])
         print("# Answer:", item["answer"])
         print()
-
-
