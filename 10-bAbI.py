@@ -27,7 +27,7 @@ def parse_babi_file(file_path):
                     'question': question,
                     'answer': answer
                 })
-                story_lines.append(question)  # можно добавлять вопрос в историю, если нужна память
+                #story_lines.append(question)  # можно добавлять вопрос в историю, если нужна память
             else:  # это факт истории
                 story_lines.append(text)
 
@@ -46,10 +46,11 @@ if __name__ == "__main__":
     # Генерация prompts/targets для GPT-2
     prompts_targets = []
     for i, item in enumerate(items):
+        if i >= 5: break
         print(f"### Example {i + 1}:")
         print("# Story:", item["story"])
         print("# Question:", item["question"])
         print("# Answer:", item["answer"])
         print()
-        if i == 5: break
+
 
