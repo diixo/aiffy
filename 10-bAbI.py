@@ -1,4 +1,6 @@
 import os
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
 
 
 def load_babi_txt(file_path: str):
@@ -35,6 +37,49 @@ def load_babi_txt(file_path: str):
     return examples
 
 
+def evaluate_gpt2_on_babi(file_path: str, max_new_tokens: int = 30):
+
+    data = load_babi_txt(file_path)
+
+    print("::evaluate_gpt2 " + 54 * "*")
+    results = []
+
+    for i, sample in enumerate(data):
+        if (i % 100 == 0) and (i > 0):
+            print("...item:", i)
+
+        story = sample["story"]
+        question = sample["question"]
+        answer = sample["answer"]
+
+        prompt = f"{story} {question}"
+
+        inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                pad_token_id=tokenizer.eos_token_id,
+                do_sample=False,  # жёсткая генерация (greedy)
+            )
+
+        generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+        if "Answer:" in generated_text:
+            pred = generated_text.split("Answer:")[-1].strip()
+        else:
+            pred = generated_text.strip()
+
+        results.append({
+            "story": story,
+            "question": question,
+            "true_answer": answer,
+            "predicted_answer": pred
+        })
+    return results
+
+
 if __name__ == "__main__":
 
     file_path = "datasets/bAbI/en-10k/qa1_single-supporting-fact_train.txt"
@@ -47,3 +92,20 @@ if __name__ == "__main__":
         print(f"# Story: {item['story']}")
         print(f"# Question: {item['question']}")
         print(f"# Answer: {item['answer']}\n")
+
+    ######################################################################
+
+    model_name = "gpt2"
+    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+    model = GPT2LMHeadModel.from_pretrained(model_name)
+    model.eval()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    results = evaluate_gpt2_on_babi(file_path)
+
+    # Можно прикинуть точность (экзакт матч)
+    correct = sum(r["true_answer"].lower() == r["predicted_answer"].lower()
+                for r in results)
+    print(f"Accuracy: {correct}/{len(results)} = {correct/len(results):.2%}")
