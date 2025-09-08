@@ -84,11 +84,11 @@ if __name__ == "__main__":
 
     file_path = "datasets/bAbI/en-10k/qa1_single-supporting-fact_train.txt"
     items = load_babi_txt(file_path)
+    items = items[-5:]  # last 5 items
 
     prompts_targets = []
     for i, item in enumerate(items):
-        if i >= 5: break
-        print(f"### Example {i + 1}:")
+        print(f"### Example {i}:")
         print(f"# Story: {item['story']}")
         print(f"# Question: {item['question']}")
         print(f"# Answer: {item['answer']}\n")
