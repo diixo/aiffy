@@ -1,7 +1,7 @@
 import os
 
 
-def parse_babi_file(file_path: str):
+def load_babi_file(file_path: str):
     """
     Split bAbI txt specified file and return list of episodes:
     [{'story': ..., 'question': ..., 'answer': ...}, ...]
@@ -40,7 +40,7 @@ def parse_babi_file(file_path: str):
 if __name__ == "__main__":
 
     file_path = "datasets/bAbI/en-10k/qa1_single-supporting-fact_train.txt"
-    items = parse_babi_file(file_path)
+    items = load_babi_file(file_path)
 
     prompts_targets = []
     for i, item in enumerate(items):
