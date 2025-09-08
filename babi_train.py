@@ -7,10 +7,6 @@ from keras.layers import add, concatenate, dot
 from keras.layers import LSTM
 from keras.models import Model, Sequential
 from keras.preprocessing.sequence import pad_sequences
-
-
-import collections
-import itertools
 from nltk.tokenize import word_tokenize
 import numpy as np
 import matplotlib.pyplot as plt
@@ -66,7 +62,7 @@ def get_stories(file_path: str):
     '''
     data = []
     # read the data file and parse 10k stories
-    if not os.path.exists(file_path):
+    if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
             # прочитать и распарсить
             data = parse_stories(f.readlines())
