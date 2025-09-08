@@ -7,12 +7,10 @@ from keras.layers import add, concatenate, dot
 from keras.layers import LSTM
 from keras.models import Model, Sequential
 from keras.preprocessing.sequence import pad_sequences
-#from keras.utils import np_utils
 
 
 import collections
 import itertools
-import nltk
 from nltk.tokenize import word_tokenize
 import numpy as np
 import matplotlib.pyplot as plt
@@ -59,7 +57,8 @@ def parse_stories(lines):
             sent = tokenize(line)
             story.append(sent)
     return data
- 
+
+
 def get_stories(file_path: str):
     '''
     argument: filename
