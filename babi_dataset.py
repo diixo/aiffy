@@ -1,27 +1,25 @@
 import os
 
 
-def load_babi_file(file_path: str):
+def load_babi_txt(file_path: str):
     """
     Split bAbI txt specified file and return list of episodes:
     [{'story': ..., 'question': ..., 'answer': ...}, ...]
     """
     examples = []
     story_lines = []
-
     with open(file_path, 'r') as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
-
-            # Remove sentence number
+            # remove sentence number
             idx, text = line.split(' ', 1)
             idx = int(idx)
 
             if '\t' in text:  # check marker of question
                 question, answer, _ = text.split('\t')
-                # Construct prompt: whole history before question
+                # construct prompt: whole history before question
                 story = ' '.join(story_lines)
                 examples.append({
                     'story': story,
@@ -31,7 +29,7 @@ def load_babi_file(file_path: str):
             else:
                 story_lines.append(text)
 
-            # Reset history by new episode (new marker == 1)
+            # reset history by new episode (new marker == 1)
             if idx == 1:
                 story_lines = [text]
     return examples
@@ -40,7 +38,7 @@ def load_babi_file(file_path: str):
 if __name__ == "__main__":
 
     file_path = "datasets/bAbI/en-10k/qa1_single-supporting-fact_train.txt"
-    items = load_babi_file(file_path)
+    items = load_babi_txt(file_path)
 
     prompts_targets = []
     for i, item in enumerate(items):
